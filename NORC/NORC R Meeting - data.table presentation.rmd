@@ -1,0 +1,35 @@
+---
+title: "NORC R Meeting - data.table"
+author: "Tomas Okal"
+date: "2/25/2020"
+output: rmarkdown::github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(data.table)
+library(tidyverse)
+library(survey)
+
+```
+
+# Section A
+
+## Section A.1 {.tabset .tabset-fade}
+
+### Section A.1.1
+
+### Section A.1.2
+
+### Section A.1.3
+
+# Section B
+
+## Section B.1 {.tabset .tabset-fade}
+
+### Section B.1.1
+
+### Section B.1.2
+
+### Section B.1.3
