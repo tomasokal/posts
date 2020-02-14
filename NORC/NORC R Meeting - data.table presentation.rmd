@@ -9,40 +9,55 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 
 library(data.table)
-library(tidyverse)
 library(survey)
 
 ```
 
-# Section A
+## Creating a data.table
 
-## Section A.1 {.tabset .tabset-fade}
+DT <- data.table(V1 = c(1L, 2L),         
+                 V2 = LETTERS[1:3],
+                 V3 = round(rnorm(4), 4),
+                 V4 = 1:12)
 
-### Section A.1.1
+## Subsetting Rows using i
 
-```{r, echo = FALSE}
-plot(iris$Sepal.Length, iris$Sepal.Width)
+## Manipulating on Columns in j
+
+## Doing j by Groups
+
+## Adding and updating Columns by Reference in j using :=
+
+## Indexing and Keys
+
+## Setting
+
+### set()
+
+```{r}
+rows <- list(3:4, 5:6)
+cols <- 1:2
+for (i in seq_along(rows)) {
+  
+  set(DT,
+      i = rows[[i]],
+      j = cols[[i]],
+      value = NA)
+  
+}
+```
+
+### setnames()
+
+```{r}
+setnames(DT, "V2", "Rating")
+setnames(DT,
+         c("V1", "V3"),
+         c("Yes", "No"))
+```
+
+```{r}
+setcolorder(DT, "V3")
 ```
 
 
-### Section A.1.2
-
-```{r, echo = FALSE}
-plot(iris$Sepal.Length, iris$Sepal.Width)
-```
-
-### Section A.1.3
-
-```{r, echo = FALSE}
-plot(iris$Sepal.Length, iris$Sepal.Width)
-```
-
-# Section B
-
-## Section B.1 {.tabset .tabset-fade}
-
-### Section B.1.1
-
-### Section B.1.2
-
-### Section B.1.3
