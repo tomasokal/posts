@@ -2,62 +2,281 @@
 title: "NORC R Meeting - data.table"
 author: "Tomas Okal"
 date: "2/25/2020"
-output: html_document
+output: ioslides_presentation
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 library(data.table)
-library(survey)
+```
 
+# Introduction
+
+## What we will go over today
+
+- What is a ```data.table``` and why would I use it?
+- Creating and using ```data.table``` along with ```fread()``` and ```fwrite()```.
+- What are the features of a ```data.table```?
+  - Subsetting our data using ```i```
+  - Selecting and creating variables using ```j```
+  - Doing complex queries using ```by```
+- Setting our ```data.table``` how we want
+  - Setting a key for fast analysis and merging
+  - Setting names to rename variables
+  - Setting column order
+
+## What is data.table?
+
+> - Fast and high performance version of base R's ```data.frame```
+> - Way to intereact with data
+
+## Why use data.table?
+
+> - ```data.table``` is much faster, especially on large data sets
+> - Similar to SQL and easy to read
+> - Very stable
+
+## Why use data.table?
+
+![10,000,000 rows with 9 columns](NORC-R-Meeting---data.table-presentation_files\\image\\data.table2.png){width=800px}
+
+## Why use data.table?
+
+![1,000,000,000 rows with 9 columns](NORC-R-Meeting---data.table-presentation_files\\image\\data.table3.png){width=800px}
+
+## Why use data.table?
+
+![2,000,000,000 rows and 9 columns](NORC-R-Meeting---data.table-presentation_files\\image\\data.table1.png){width=800px}
+
+# Making data.tables
+
+## Reading and writing data using data.table
+
+```{r}
+df <- fread("https://raw.githubusercontent.com/Nahfid/NFL-Combine-Data/master/playercombinedata.csv")
+
+dat <- setDT(df)
+```
+
+```{r, eval = FALSE}
+fwrite(dat, "////Project Folder//nflcombine.csv")
 ```
 
 ## Creating a data.table
 
-DT <- data.table(V1 = c(1L, 2L),         
-                 V2 = LETTERS[1:3],
-                 V3 = round(rnorm(4), 4),
-                 V4 = 1:12)
+```{r, eval = FALSE}
+dat <- setDT(df)
 
-## Subsetting Rows using i
+dat <- data.table(var1 = c(1, 2, 3, 4),
+                  var2 = c("Tom", "Tomas", "Tommy", "Tom Jr."),
+                  var3 = 1:4)
+```
 
-## Manipulating on Columns in j
+```{r, include = FALSE}
+dat <- dat[,
+           j = list(
+             Year, 
+             Name, 
+             College, 
+             POS
+           )
+           ]
+```
 
-## Doing j by Groups
+# Functionality
 
-## Adding and updating Columns by Reference in j using :=
+## Features of a data.table
 
-## Indexing and Keys
+``` dat[i, j, by] ```
 
-## Setting
-
-### set()
-
-```{r}
-rows <- list(3:4, 5:6)
-cols <- 1:2
-for (i in seq_along(rows)) {
+- i is our row argument
+  - This is the "key"
+  - We can have multiple keys
+- j is our column argument
+  - This can be a created argument like mean, minimum, etc.
+  - Can also be an existing column
+- by is our group argument
+  - Can have multiple group terms
   
-  set(DT,
-      i = rows[[i]],
-      j = cols[[i]],
-      value = NA)
-  
-}
-```
-
-### setnames()
+## Picking specific cases [using ```i```]
 
 ```{r}
-setnames(DT, "V2", "Rating")
-setnames(DT,
-         c("V1", "V3"),
-         c("Yes", "No"))
+dat
+```
+
+## Picking specific cases [using ```i```]
+
+```{r}
+dat[
+  ### <b>
+  i = Year == 2012,
+  ### </b>
+  ]
+```
+
+## Picking specific cases [using ```i```]
+
+```{r}
+dat[
+  ### <b>
+  i = Year == 2012 &
+      POS == "QB" &
+      College == "Baylor", 
+  ### </b>
+  ]
+```
+
+## Picking specific columns [using ```j```]
+
+```{r, include = FALSE}
+df <- fread("https://raw.githubusercontent.com/Nahfid/NFL-Combine-Data/master/playercombinedata.csv")
+dat <- setDT(df)
 ```
 
 ```{r}
-setcolorder(DT, "V3")
+dat[
+  i = Year == 2012 &
+      POS == "QB" &
+      `Hand Size (in)` > 9 &
+      `40 Yard` < 4.6, 
+  ### <b>
+  j = list(Name, 
+           `40 Yard`,
+           `Broad Jump (in)`)
+  ### </b>
+  ]
 ```
 
+## Picking specific columns [using ```j```]
 
+```{r}
+dat[
+  i = Year == 2012 &
+      POS == "QB" &
+      `Hand Size (in)` > 9,
+  ### <b>
+  j = list(Name, 
+           College,
+           `40 Yard`,
+           diff_mean_speed = mean(`40 Yard`) - `40 Yard`)
+  ### </b>
+  ][`40 Yard` < 4.6]
+```
+
+<<<<<<< HEAD
+## Doing things by groups [using ```by```]
+
+```{r}
+dat[
+  i = !is.na(`40 Yard`) &
+      !is.na(`3Cone`) &
+      POS %in% c("QB", "RB", "WR"),
+  j = list(count = .N,
+           speed_avg = mean(`40 Yard`),
+           agility_avg = mean(`3Cone`)
+           ),
+  ### <b>
+  by = POS
+  ### </b>
+  ]
+```
+
+## Doing things by groups [using ```by```]
+
+```{r}
+mydata <- dat[
+  i = !is.na("40 yard") &
+      !is.na("3 cone") &
+      !is.na("Vert Leap (in") &
+      POS %in% c("QB", "RB", "WR", "CB", "LB", "TE"),
+  j = list(count = .N,
+           speed_avg = mean(`40 Yard`),
+           speed_sd = sd(`40 Yard`),
+           agility_avg = mean(`3Cone`),
+           agility_sd = sd(`3Cone`)
+           ),
+  ### <b>
+  by = list(POS, Year)]
+  ### </b>
+```
+
+## Doing things by groups [using ```by```]
+
+```{r}
+mydata
+```
+
+# Setting 
+
+## ```setkey()```
+
+```{r, include = FALSE}
+dat <- dat[,
+           j = list(
+             Year, 
+             Name, 
+             College, 
+             POS
+           )
+           ]
+```
+
+```{r}
+setkey(dat, 
+       ### <b>
+       POS
+       ### </b>
+       )
+
+dat["QB"]
+```
+
+## ```setkey()```
+
+```{r}
+setkey(dat, 
+       ### <b>
+       POS, College
+       ### </b>
+       )
+
+dat[.("QB", "Baylor")]
+```
+
+## ```setname()```
+
+```{r, include = FALSE}
+df <- fread("https://raw.githubusercontent.com/Nahfid/NFL-Combine-Data/master/playercombinedata.csv")
+dat <- setDT(df)
+```
+
+```{r}
+setnames(dat, 
+         ### <b>
+         "40 Yard", "forty_yard"
+         ### </b>
+         )
+
+setnames(dat, 
+         c("Arm Length (in)", "Hand Size (in)"),
+         c("arm_length", "hand_size"))
+```
+
+## ```setcolorder()```
+
+```{r}
+setcolorder(dat, 
+            ### <b>
+            c("Year", "Name", "arm_length", "hand_size", "forty_yard")
+            ### </b>
+            )
+
+dat
+```
+
+## More resources
+
+- [datatable](https://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.html)
+- [CheatSheet](https://s3.amazonaws.com/assets.datacamp.com/blog_assets/datatable_Cheat_Sheet_R.pdf)
+- [Presentations](https://github.com/Rdatatable/data.table/wiki/Presentations)
