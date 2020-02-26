@@ -164,7 +164,6 @@ dat[
   ][`40 Yard` < 4.6]
 ```
 
-<<<<<<< HEAD
 ## Doing things by groups [using ```by```]
 
 ```{r}
