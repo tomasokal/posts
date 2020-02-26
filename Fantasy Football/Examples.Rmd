@@ -1,0 +1,122 @@
+---
+title: "Examples"
+author: "Tomas Okal"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(data.table)
+library(ggplot2)
+library(fmsb)
+
+df <- fread("https://raw.githubusercontent.com/Nahfid/NFL-Combine-Data/master/playercombinedata.csv")
+
+dat <- setDT(df)
+
+dat_work <- setnames(dat, 
+                     c("Year", "Name", "College", "POS", "Height (in)", "Weight (lbs)", "Hand Size (in)", "Arm Length (in)", "Wonderlic", "40 Yard", "Bench Press", "Vert Leap (in)", "Broad Jump (in)", "Shuttle", "3Cone", "60Yd Shuttle"),
+                     c("year", "name", "college", "position", "height", "weight", "hand", "arm_length", "wonderlic", "forty", "bench", "vertical", "broad", "shuttle", "three_cone", "sixty"))
+
+dat_work[dat_work$forty == 9.99] <- NA
+dat_work[dat_work$three_cone == 9.99] <- NA
+```
+
+# Data
+
+```{r, include = FALSE}
+dat_calc <- dat_work[
+  i = position %in% c("QB", "WR", "RB", "TE") &
+      year >= 2000
+  ,
+  j = list(
+    name,
+    year,
+    position,
+    forty,
+    forty_perc = ifelse(is.na(forty), 
+                        0, 
+                        100*((max(forty, na.rm = TRUE) - forty)/(max(forty, na.rm = TRUE) - min(forty, na.rm = TRUE)))),
+    three_cone,
+    three_cone_perc = ifelse(is.na(three_cone), 
+                             0, 
+                             100*((max(three_cone, na.rm = TRUE) - three_cone)/(max(three_cone, na.rm = TRUE) - min(three_cone, na.rm = TRUE)))),
+    vertical,
+    vertical_perc = ifelse(is.na(vertical), 
+                            0, 
+                            100*((vertical - min(vertical, na.rm = TRUE))/(max(vertical, na.rm = TRUE) - min(vertical, na.rm = TRUE)))),
+    broad,
+    broad_perc = ifelse(is.na(broad), 
+                        0, 
+                        100*((broad - min(broad, na.rm = TRUE))/(max(broad, na.rm = TRUE) - min(broad, na.rm = TRUE)))),
+    bench,
+    bench_perc = ifelse(is.na(bench), 
+                        0, 
+                        100*((bench - min(bench, na.rm = TRUE))/(max(bench, na.rm = TRUE) - min(bench, na.rm = TRUE))))
+  )
+  ]
+
+dat_work <- dat_calc[,
+                     j = list(
+                     name,
+                     year,
+                     position,
+                     forty_perc,
+                     three_cone_perc,
+                     vertical_perc,
+                     broad_perc,
+                     bench_perc
+                     )
+                     ]
+
+```
+
+```{r}
+dat_work
+```
+
+## Radar Chart
+
+```{r}
+dat_sample <- dat_work[
+  i = sample(.N, 1)
+  ,
+  j = list(
+    forty_perc,
+    three_cone_perc,
+    vertical_perc,
+    broad_perc,
+    bench_perc
+  )
+  ]
+
+dat_radar <- rbindlist(
+  list(
+    data.table(a = 100,
+               b = 100,
+               c = 100,
+               d = 100,
+               e = 100),
+    data.table(a = 0,
+               b = 0,
+               c = 0,
+               d = 0,
+               e = 0),
+    dat_sample
+    )
+  )
+
+
+radarchart(dat_radar,
+           pcol = rgb(0.2, 0.5, 0.5, 0.9),
+           pfcol = rgb(0.2,0.5,0.5,0.5),
+           plwd = 4,
+           cglcol = "grey", 
+           cglty = 1, 
+           cglwd = 0.8,
+           vlabels = c("Forty Yard Dash", "Three Cone Dash", "Vertical Jump", "Broad Jump", "Bench Press"),
+           vlcex = 0.70
+           )
+```
+
