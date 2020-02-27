@@ -7,49 +7,58 @@ header <- dashboardHeader(title = "Example of content")
 
 sidebar <- dashboardSidebar()
 
-body <- dashboardBody()
-
-ui <- dashboardPage(header, sidebar, body)
-
-
-ui <- dashboardPage(
+body <- dashboardBody(
   
-  dashboardHeader(title = "Title of our content"),
-  
-  dashboardSidebar(sidebarMenu(
-    menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
-    menuItem("Widgets", tabName = "widgets", icon = icon("th"))
-    )
-    ),
-  
-  dashboardBody(
-    tabItems(
-      tabItem(tabName = "dashboard",
-              fluidRow(
-                box(plotOutput("plot1", height = 250)),
-                box(
-                  title = "Controls",
-                  sliderInput("slider", "Number of observations:", 1, 100, 50)
-                )
-              )
+  fluidRow(
+    
+    # style = "margin-top:20%;",
+    
+    column(
+      
+      width = 8,
+      
+      plotOutput("radar")
+      
       ),
     
-    tabItem(tabName = "widgets",
-            h2("Widgets tab content")
-            )
+    column(
+      
+      width = 4,
+      
+      plotOutput("density1")
+      
+    )
     
   )
-  )
+  
 )
 
+ui <- dashboardPage(header, sidebar, body,
+                    skin = "green")
+
+
 server <- function(input, output) {
-  set.seed(122)
-  histdata <- rnorm(500)
   
-  output$plot1 <- renderPlot({
-    data <- histdata[seq_len(input$slider)]
-    hist(data)
+  rad <- fread("radar.csv")
+  
+  pos <- fread("position.csv")
+  
+  output$radar <- renderPlot({
+    
+    data <- pos[, j = list(forty_perc)]
+    hist(data$forty_perc)
+    
   })
+  
+  output$density1 <- renderPlot({
+    
+    data <- pos[, j = list(forty_perc)]
+    hist(data$forty_perc)
+    
+  })
+  
 }
 
 shinyApp(ui, server)
+
+
