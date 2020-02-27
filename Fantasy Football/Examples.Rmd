@@ -1,10 +1,10 @@
 ---
-title: "Examples"
+title: "Example Visualization"
 author: "Tomas Okal"
 output: github_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 library(data.table)
@@ -24,6 +24,14 @@ dat_work[dat_work$three_cone == 9.99] <- NA
 ```
 
 # Data
+
+I was able to find a file that has historical NFL combine data from the 80s to 2018. Using this data, I was able to scale every player that is in the dataset by the worst and best performances for the 40 yard dash, 3 yard cone drill, Vertical jump, Broad jump, and Bench press. 
+
+The goal is then to any player that we want against this scale to see how good they were at the combine. 
+
+For fantasy football, we can use this same approach but find a series of 4 to 6 metrics that we find to be important for each position and rate each player as the season progresses to the best and worst performances by that same position class. For example, in the upcoming 2020 season when it is 3 games in, how well is Julio Jones or Mike Williams doing against these metrics. 
+
+We could also apply this same methodology to NFL offenses in general. Drive success rate, Turnovers, Punt rate, Pass rate, etc. could all be mapped like this to get a gauge on how well offenses are doing as the season progresses when compared to historical trends. 
 
 ```{r, include = FALSE}
 dat_calc <- dat_work[
@@ -72,51 +80,226 @@ dat_work <- dat_calc[,
 
 ```
 
-```{r}
-dat_work
+Here is a sample of this data showing the first 5 and last five rows (players) for this dataset. As seen, we have the name, year, and position of each player along with this new metric for the 40 yard dash and other combine drills. The closer a number is to 100, the better it is as it is closer to the best performance in that drill. The closer it is to 0, the worse it is. Players who did not perform in a drill are given a value of 0.
+
+```{r, echo = FALSE}
+dat_work[, 1:6]
 ```
 
 ## Radar Chart
 
-```{r}
-dat_sample <- dat_work[
-  i = sample(.N, 1)
-  ,
-  j = list(
-    forty_perc,
-    three_cone_perc,
-    vertical_perc,
-    broad_perc,
-    bench_perc
-  )
-  ]
+I now use this data to create the radar charts. The package I used to create this is a bit problematic so I will find an alternative way to do this later. But we can pick a position and see how good that position does in relation to the overall performances. 
 
-dat_radar <- rbindlist(
-  list(
-    data.table(a = 100,
-               b = 100,
-               c = 100,
-               d = 100,
-               e = 100),
-    data.table(a = 0,
-               b = 0,
-               c = 0,
-               d = 0,
-               e = 0),
-    dat_sample
+Below is how well Quarterbacks do in comparison to other positions.
+
+```{r, include = FALSE}
+
+position_radar <- function(data, p) {
+  
+  dat_combine <- data[
+    ,
+    j = list(
+      position,
+      forty_perc,
+      three_cone_perc,
+      vertical_perc,
+      broad_perc,
+      bench_perc
     )
-  )
+  ]
+  
+  dat_pos <- dat_combine[
+    ,
+    lapply(
+      .SD,
+      mean,
+      na.rm = TRUE
+    )
+    ,
+    by = position
+  ][position == p]
+  
+  dat_radar <- rbindlist(
+    list(
+      data.table(
+        a = 100,
+        b = 100,
+        c = 100,
+        d = 100,
+        e = 100
+        ),
+      data.table(
+        a = 0,
+        b = 0,
+        c = 0,
+        d = 0,
+        e = 0
+        ),
+      dat_pos[, 2:6]
+      )
+    )
+  
+  return(dat_radar)
+  
+}
 
+```
 
-radarchart(dat_radar,
-           pcol = rgb(0.2, 0.5, 0.5, 0.9),
-           pfcol = rgb(0.2,0.5,0.5,0.5),
+```{r, message = FALSE, echo = FALSE}
+dat_radar <- position_radar(data = dat_work, p = "QB")
+```
+
+```{r, echo = FALSE}
+radarchart(df = dat_radar,
+           axistype = 1,
+           seg = 3,
+           pcol = rgb(0.2,0.5,0.5,0.9),
            plwd = 4,
-           cglcol = "grey", 
-           cglty = 1, 
+           pfcol = rgb(0.2,0.5,0.5,0.5),
+           cglty = 1,
            cglwd = 0.8,
-           vlabels = c("Forty Yard Dash", "Three Cone Dash", "Vertical Jump", "Broad Jump", "Bench Press"),
-           vlcex = 0.70
+           cglcol = "grey",
+           axislabcol = "black",
+           vlabels = c("40 Yard Dash",
+                       "3 Yard Cone",
+                       "Vertical",
+                       "Broad",
+                       "Bench"),
+           vlcex = 0.7,
+           caxislabels = c("", "", "", "Best"),
+           calcex = 0.7,
+           title = "Quarterbacks"
            )
 ```
+
+And how well Wide Receivers do.
+
+```{r, message = FALSE, echo = FALSE}
+dat_radar <- position_radar(data = dat_work, p = "WR")
+```
+
+```{r, echo = FALSE}
+radarchart(df = dat_radar,
+           axistype = 1,
+           seg = 3,
+           pcol = rgb(0.2,0.5,0.5,0.9),
+           plwd = 4,
+           pfcol = rgb(0.2,0.5,0.5,0.5),
+           cglty = 1,
+           cglwd = 0.8,
+           cglcol = "grey",
+           axislabcol = "black",
+           vlabels = c("40 Yard Dash",
+                       "3 Yard Cone",
+                       "Vertical",
+                       "Broad",
+                       "Bench"),
+           vlcex = 0.7,
+           caxislabels = c("", "", "", "Best"),
+           calcex = 0.7,
+           title = "Wide Receivers"
+           )
+```
+
+```{r, include = FALSE}
+
+combine_radar <- function(data, p, y) {
+  
+  dat_combine <- data[
+    i = year == y &
+        name == p
+    ,
+    j = list(
+      forty_perc,
+      three_cone_perc,
+      vertical_perc,
+      broad_perc,
+      bench_perc
+      )
+  ]
+  
+  dat_radar <- rbindlist(
+    list(
+      data.table(
+        a = 100,
+        b = 100,
+        c = 100,
+        d = 100,
+        e = 100
+        ),
+      data.table(
+        a = 0,
+        b = 0,
+        c = 0,
+        d = 0,
+        e = 0
+        ),
+      dat_combine
+      )
+    )
+  
+  return(dat_radar)
+  
+}
+
+```
+
+However we can pick out players by name and year from this such as Tom Brady from 2000.
+
+```{r, message = FALSE, echo = FALSE}
+dat_radar <- combine_radar(data = dat_work, p = "Tom Brady", y = 2000)
+```
+
+```{r, echo = FALSE}
+radarchart(df = dat_radar,
+           axistype = 1,
+           seg = 3,
+           pcol = rgb(0.2,0.5,0.5,0.9),
+           plwd = 4,
+           pfcol = rgb(0.2,0.5,0.5,0.5),
+           cglty = 1,
+           cglwd = 0.8,
+           cglcol = "grey",
+           axislabcol = "black",
+           vlabels = c("40 Yard Dash",
+                       "3 Yard Cone",
+                       "Vertical",
+                       "Broad",
+                       "Bench"),
+           vlcex = 0.7,
+           caxislabels = c("", "", "", "Best"),
+           calcex = 0.7,
+           title = "Tom Brady"
+           )
+```
+
+Or Curtis Samuel from 2017.
+
+```{r, message = FALSE, echo = FALSE}
+dat_radar <- combine_radar(data = dat_work, p = "Curtis Samuel", y = 2017)
+```
+
+```{r, echo = FALSE}
+radarchart(df = dat_radar,
+           axistype = 1,
+           seg = 3,
+           pcol = rgb(0.2,0.5,0.5,0.9),
+           plwd = 4,
+           pfcol = rgb(0.2,0.5,0.5,0.5),
+           cglty = 1,
+           cglwd = 0.8,
+           cglcol = "grey",
+           axislabcol = "black",
+           vlabels = c("40 Yard Dash",
+                       "3 Yard Cone",
+                       "Vertical",
+                       "Broad",
+                       "Bench"),
+           vlcex = 0.7,
+           caxislabels = c("", "", "", "Best"),
+           calcex = 0.7,
+           title = "Curtis Samuel"
+           )
+```
+
 
