@@ -21,6 +21,7 @@ dat_work <- setnames(dat,
 
 dat_work[dat_work$forty == 9.99] <- NA
 dat_work[dat_work$three_cone == 9.99] <- NA
+
 ```
 
 # Data
