@@ -3,7 +3,7 @@
 library(shinydashboard)
 library(shiny)
 
-header <- dashboardHeader(title = "Example of content")
+header <- dashboardHeader(title = "Example of content") 
 
 sidebar <- dashboardSidebar()
 
