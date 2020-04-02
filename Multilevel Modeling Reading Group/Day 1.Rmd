@@ -60,6 +60,8 @@ Random coefficient models do not solve issue they address. They make it better, 
 
 If the relationship between x and y is fully explalined by a consistent difference in slope based on group (shift in y values are consistent across groups) then all of the models will give the same results.
 
+Things to consider are temporal effects not explained by multilevel models (proximate years are more similar as effect of year could change (e.g. is waves of surveys)). Other things are geospatial effects that are not explalined by multilevel models (individuals within counties vary based on county, but some counties are more similar to one another due to proximity). OOF
+
 ## Types of models
 
 * Standard
