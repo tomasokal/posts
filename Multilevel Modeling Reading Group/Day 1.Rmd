@@ -1,0 +1,80 @@
+---
+title: "April 2nd 2020"
+author: "Tomas Okal"
+date: "4/2/2020"
+output: pdf_document
+---
+
+# Notes
+
+## Random Effects
+
+Hierarchical structures in data can be be seen in terms of levels. Level 1 has individuals or points that vary in time. Level 2 has structures that nest Level 1 individuals but are time invariant. Pooled linear regression models will assume that residuals are independently distrubuted. Once all covariates are considered, there are no correlation nor depedence between measures. Thus, this approach will view any Level 2 structure as identical which can be unreasonable. Measurement of Level 1 individuals within a Level 2 structure will be related to one another. Standard errors will be incorrect and biased if this is not taken into account.
+
+RE solution is to partition unexplained residual variance into both Level 1 and Level 2 variance.
+
+$$y_{ij} = \beta_{0} + \beta_{1}*x_{1ij} + \beta_{2}*Z_{j} + (u_{j} + e_{ij})$$
+The variance terms are both assumed to be normally distributed. Even when these normality assumptions are violated, RE models perform rather well. A further assumption is that RE models are exogenous. In other words, the residuals are independnet of the covariateds.
+
+### Within and bewteen group effects
+
+If the within and between group effects are assumed to be identical, then a one unit increase in $x_{ij}$ is assumed to be the same for any Level 2 structure which is unreasonable in many applications. If RE model is abandoned due to fears of endogeneity, then ommited variable bias is possible due to not being able to account for between effect. The authors view this as a heterogeneity issue rather than a endogeneity issue.
+
+## Fixed Effects
+
+FE models side step the heterogeneity problem of RE models by controlling all higher level variance, and thus between effects, using dummy variables for each Level 2 structure. This comes at the cost of not being able to to estimate effects of higher level processes. A Hausman test can be used to test whether RE or FE is more appropriate. However, the authors point out that a negative result in the Hausman test can only tell us that the between effect is not significantly biasing an estimation of the within effect. It tells us nothing of the between effect.
+
+### Problems with FE models.
+
+Firstly, FE models control out any time-invariant variables and no inferences can be made about them. If the goal of the study is to measure the impact of a time invariant variable, then FE models are less than interesting.
+
+#### Plumper and Troeger 
+
+A method by the above two researchers attempts to estimate the effects of rarely changing variables with FE modeling, but it is measuring a slightly different variable and if one between effect of a rarely changing variable is of interest, then why would other between effects not be.
+
+## A RE solution!
+
+Simply add in an additional term in the model for each time-varying covariate that accounts for the between effect with a higher level mean.
+
+$$y_{ij} = \beta_{0} + \beta_{1}x_{ij} + \beta_{3}\bar{x}_{j} + \beta_{2}Z_{j} + (u_{j} + e_{ij})$$
+
+Three advantages
+
+* More interpretable as within and between effects are clearly separated
+* By group mean centering $x_{ij}$, collinearlity is lost leading to more precise estimates
+* If some $\bar{x}_{j}$ variables are multicollinear, then you can remove them without risk of heterogeneity bias. 
+
+Overall, this leads to estimates of effects of time-invariant variables being controlled for by their means and for correct standard erros are automatically calculated by accounting for multiple sources of clustering.
+
+### Issue with Hausman test
+
+Does not test for FE vs. RE, it test for similarilty of within and between effects. A properly specified RE model will be identical to FE regardless of test. 
+
+# Reading group
+
+Random Intercepts is taking dummy variables of Level 2 structures and then combining the $\alpha$ terms into one latent variable (rough description).
+
+Random effects models (standard) within an experiment don't have to deal with endogeneity issue.
+
+Random coefficient models do not solve issue they address. They make it better, but do not actually generate unbiased estimates if the effect of $x$ on $y$ is not modeled.
+
+If the relationship between x and y is fully explalined by a consistent difference in slope based on group (shift in y values are consistent across groups) then all of the models will give the same results.
+
+## Types of models
+
+* Standard
+
+$$y_{ij} = \beta_{0} + \beta_{1}x_{1ij}$$
+
+* Mundlark
+
+$$y_{ij} = \beta_{0} + \beta_{1}x_{ij} + \beta_{3}\bar{\bar{x}}_{j}$$
+
+* Within-Between
+
+$$y_{ij} = \beta_{0} + \beta_{1}(x_{ij} - \bar{\bar{x_{j}}}) + \beta_{4}\bar{\bar{x_{j}}}$$
+
+* Within
+
+$$y_{ij} = \beta_{0} + \beta_{1}(x_{ij} - \bar{\bar{x_{j}}})$$
+
