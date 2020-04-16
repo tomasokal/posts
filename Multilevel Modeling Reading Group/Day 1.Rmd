@@ -2,7 +2,8 @@
 title: "April 2nd 2020"
 author: "Tomas Okal"
 date: "4/2/2020"
-output: pdf_document
+output: github_document:
+  pandoc_args: --webtex
 ---
 
 # Notes
