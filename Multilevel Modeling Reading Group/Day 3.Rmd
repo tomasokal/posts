@@ -11,7 +11,7 @@ output: github_document
 
 There is a discrepency between the original definition of a random effect and its current implementation in analytics. 
 
-A traditional definition of a random effect is that the levels of a random effect (level 1) are draws from a population, but not necessarily of interest by themeselves. Instead the larger population is of interest. 
+A traditional definition of a random effect is that the levels of a random effect (level 1) are draws from a population, but not necessarily of interest by themeselves. Instead the larger population is of interest.    
 
 In other words, the levels (subjects) are a sample (not necessarily random) and not interesting individually, but rather as members of population they are drawn from and the object of random effects is the measure the average difference in that population between the higher levels (methods and locations). 
 
